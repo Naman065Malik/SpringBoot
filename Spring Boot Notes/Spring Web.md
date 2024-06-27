@@ -61,7 +61,6 @@ package com.example.StudentTrack.Model;
 
 import org.springframework.stereotype.Component;
 
-@Component
 public class Student {
     private Long id;
     private String name;
@@ -103,6 +102,53 @@ In this code, `@Component` registers this class as bean during the initializatio
 **Note: For classes that will be managed by Container, should have a default Constructor in its code**
 
 ### Basic Rest Controller
+
+we will use `@RestController` annotation to describe our first Controller.
+
+In this code we are initializing a `Hash Map` to save the data of students in key-value Pair format. In further tutorials we will be using JPA and ORM such as Hibernate to save this data in a database.
+
+`@GetMapping` and `@PostMapping` is used to create `/student` route which will help us to create new Student data as well as in return all the students. 
+
+`@RequestBody` is used to extract the body of request. It maps the Json body into parameter a function.
+
+```java
+package com.example.StudentTrack.Controller;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.example.StudentTrack.Model.Student;
+
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
+
+@RestController
+public class StudentController {
+
+    private Map<Long, Student> studentRepo = new HashMap<>();
+
+    @GetMapping("/Student")
+    public Map getAllStudent(){
+        return studentRepo;
+    }
+
+    @PostMapping("/Student")
+    public String createStudent(@RequestBody Student student) {
+        studentRepo.put(student.getId(), student);
+        return "Student added to the database";
+    }
+}
+```
+
+### Other HTTP Methods
+
+Going Deeper into our RestController by learning about other important HTTP Methods
 
 ```java
 package com.example.StudentTrack.Controller;
@@ -157,7 +203,13 @@ public class StudentController {
 }
 ```
 
-In this code we are initializing a Hash Map to save the data of students in key-value Pair format. In further tutorials we will be using JPA and ORM such as Hibernate to save this data in a database.
+### Difference Between Path Variable and Request Param
+
+| @PathVariable (/Student/{id}) | @RequestParam (/Student?id=1) |
+| --- | --- |
+| It is used to extract query parameters from URL path. | It is used to extract query parameters directly from URL. |
+| It maps the URL path variable directly to method parameters. | It binds query String Parameters from the URL to method parameters. |
+| Typically used in RESTful web services to capture dynamic values from the URL. | Commonly used to capture values from query strings in URLs. |
 
 ## Initializing studentRepo as a Bean
 
@@ -249,3 +301,132 @@ public class AnotherController {
     }
 }
 ```
+
+## Going Deeper into RESTful Response
+
+Till now, we have developed an Api which can perform all CRUD operations with the Student Data, But Still we cannot consider it RESTful as it does not return data in correct manner.
+
+**Problem:** Currently our Api cannot be able to inform us about the conditions such as Not Found.
+
+```java
+@RestController
+public class StudentController {
+
+		@Aotowired
+    private Map<Long, Student> studentRepo;
+
+    @GetMapping("/getStudent")
+    public Student getStudentById(@RequestParam Long studentId) {
+        Student response = studentRepo.get(studentId);
+        if(response == null){
+		        return "Student Not Found";
+		    // Now Here we will get Error: cannot convert from String to Student
+		    }
+        return Student;
+    }
+}
+```
+
+As Response type of our `getStudentByID` method is Student It will not be able to return a String saying, “Student Not Found”.
+
+**Solution:** Now we can Wrap all of our responses in `ResponseEntity` Object.
+
+```java
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+@RestController
+public class StudentController {
+
+		@Aotowired
+    private Map<Long, Student> studentRepo;
+
+    @GetMapping("/getStudent")
+    public ResponseEntity<?> getStudentById(@RequestParam Long studentId) {
+        Student response = studentRepo.get(studentId);
+        if(response == null){
+            return new ResponseEntity<>("Student Not Found",HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+}
+```
+
+It will also help us to return Correct Http Status code as well.
+
+[HTTP Status Codes](/Important_Topic/StatusCode.md)
+
+### Student Controller
+
+```java
+package com.example.StudentTrack.Controller;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.StudentTrack.Model.Student;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+@RestController
+public class StudentController {
+
+    @Autowired
+    private Map<Long, Student> studentRepo;
+
+    @GetMapping("/Student")
+    public ResponseEntity<Map<Long, Student>> getAllStudent(){
+        return new ResponseEntity<>(studentRepo,HttpStatus.OK);
+    }
+
+    @PostMapping("/Student")
+    public ResponseEntity<String> createStudent(@RequestBody Student student) {
+        if(studentRepo.containsKey(student.getId()))
+            return new ResponseEntity<>("Student already exists", HttpStatus.CONFLICT);
+            
+        studentRepo.put(student.getId(), student);
+        return new ResponseEntity<>("Student added to the database", HttpStatus.CREATED);
+    }
+
+    @GetMapping("/getStudent")
+    public ResponseEntity<?> getStudentById(@RequestParam Long studentId) {
+        Student response = studentRepo.get(studentId);
+        if(response == null){
+            return new ResponseEntity<>("Student Not Found",HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
+    @PutMapping("/Student/{id}")
+    public ResponseEntity<?> putUpdateStudent(@PathVariable Long id, @RequestBody Student student) {    
+        
+        if(studentRepo.containsKey(id))
+            return new ResponseEntity<>("Student Not Found", HttpStatus.NOT_FOUND);
+
+				student.setId(id);
+        Student response = studentRepo.put(id, student);
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
+    @DeleteMapping("/Student/{id}")
+    public ResponseEntity<?> deleteStudent(@PathVariable Long id){
+
+        if(studentRepo.containsKey(id))
+            return new ResponseEntity<>("Student Not Found", HttpStatus.NOT_FOUND);
+
+        studentRepo.remove(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    } 
+}
+```
+
+**Note: Above Code does not contain best practices for handling cases such as User Not Found, In Further chapters we will learn about Exception Handling which will handle these cases.**
