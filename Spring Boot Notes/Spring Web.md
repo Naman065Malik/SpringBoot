@@ -52,7 +52,7 @@ In this code, `@SpringBootApplication` Annotation automatically set all the conf
 
 [`SpringApplication.run`](http://SpringApplication.run) method creates an appropriate `ApplicationContext` instance, configures and registeres all the `beans` into the Context [Container].
 
-### General Student Class
+## General Student Class
 
 I have saved this file in `/Model` folder
 
@@ -101,7 +101,7 @@ In this code, `@Component` registers this class as bean during the initializatio
 
 **Note: For classes that will be managed by Container, should have a default Constructor in its code**
 
-### Basic Rest Controller
+## Basic Rest Controller
 
 we will use `@RestController` annotation to describe our first Controller.
 
@@ -146,7 +146,7 @@ public class StudentController {
 }
 ```
 
-### Other HTTP Methods
+## Other HTTP Methods
 
 Going Deeper into our RestController by learning about other important HTTP Methods
 
@@ -203,7 +203,7 @@ public class StudentController {
 }
 ```
 
-### Difference Between Path Variable and Request Param
+## Difference Between Path Variable and Request Param
 
 | @PathVariable (/Student/{id}) | @RequestParam (/Student?id=1) |
 | --- | --- |
@@ -302,7 +302,7 @@ public class AnotherController {
 }
 ```
 
-## Going Deeper into RESTful Response
+# Going Deeper into RESTful Response
 
 Till now, we have developed an Api which can perform all CRUD operations with the Student Data, But Still we cannot consider it RESTful as it does not return data in correct manner.
 
@@ -356,7 +356,7 @@ It will also help us to return Correct Http Status code as well.
 
 [HTTP Status Codes](/Important_Topic/StatusCode.md)
 
-### Student Controller
+## Student Controller
 
 ```java
 package com.example.StudentTrack.Controller;
