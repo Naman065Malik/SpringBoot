@@ -430,3 +430,167 @@ public class StudentController {
 ```
 
 **Note: Above Code does not contain best practices for handling cases such as User Not Found, In Further chapters we will learn about Exception Handling which will handle these cases.**
+
+
+## Service Component
+
+In Spring Boot, the Service component helps to increase loose coupling by separating the business logic from the controller and repository layers. This separation allows for easier maintenance, testing, and scalability of the application. By using the Service layer, you can:
+
+1. **Encapsulate Business Logic**: The Service component contains the business logic, which can be reused across multiple controllers or other components in the application.
+2. **Promote Reusability**: Since the business logic is centralized in the Service layer, it can be easily reused by different parts of the application without duplicating code.
+3. **Enhance Testability**: By isolating the business logic in the Service layer, you can write unit tests for the Service methods independently of the controller and repository layers.
+4. **Improve Maintainability**: Changes to the business logic are confined to the Service layer, making the application easier to maintain and update.
+5. **Enable Dependency Injection**: Spring Boot's dependency injection allows you to inject Service components into controllers or other services, promoting loose coupling and reducing dependencies between components.
+
+Overall, the Service component enhances the modularity and flexibility of the application by clearly defining the responsibilities of each layer.
+
+### Student Service Interface
+
+Making an interface for Service will help us to use different Student Service beans without changing the code in Controller.
+
+```java
+package com.example.StudentTrack.Service;
+
+import java.util.Map;
+
+import com.example.StudentTrack.Model.Student;
+
+public interface StudentService {
+    Map<Long, Student> getAllStudent();
+    Student getStudentById(Long id);
+    Student createStudent(Long id, Student student);
+    Student updateStudent(Long id, Student student);
+    boolean deleteStudent(Long id);
+    boolean checkIDExist(Long id);
+
+}
+```
+
+### Student Service
+
+```java
+package com.example.StudentTrack.Service;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.StudentTrack.Model.Student;
+
+@Service
+public class StudentServiceImp implements StudentService {
+
+    @Autowired
+    private Map<Long,Student> studentRepo;
+
+    @Override
+    public Map<Long, Student> getAllStudent() {
+        return studentRepo;
+    }
+
+    @Override
+    public Student getStudentById(Long id) {
+        return studentRepo.get(id);
+    }
+
+    @Override
+    public Student createStudent(Long id, Student student) {
+        studentRepo.put(id, student);
+        return studentRepo.get(id);
+    }
+
+    @Override
+    public Student updateStudent(Long id, Student student) {
+        student.setId(id);
+        studentRepo.put(id, student);
+        return studentRepo.get(id);
+    }
+
+    @Override
+    public boolean deleteStudent(Long id) {
+        studentRepo.remove(id);
+        return true;
+    }
+
+    @Override
+    public boolean checkIDExist(Long id) {
+        Student student = studentRepo.get(id);
+        return !(student == null);
+    }
+}
+```
+
+### Using Student Service in Controller
+
+```java
+package com.example.StudentTrack.Controller;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.StudentTrack.Model.Student;
+import com.example.StudentTrack.Service.StudentService;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+@RestController
+public class StudentController {
+
+    @Autowired
+    private StudentService studentService;
+
+    @GetMapping("/Student")
+    public ResponseEntity<Map<Long, Student>> getAllStudent(){
+        Map<Long, Student> response = studentService.getAllStudent();
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
+    @PostMapping("/Student")
+    public ResponseEntity<String> createStudent(@RequestBody Student student) {
+        if(studentService.checkIDExist(student.getId()))
+            return new ResponseEntity<>("Student already exists", HttpStatus.CONFLICT);
+
+        studentService.createStudent(student.getId(), student);
+        return new ResponseEntity<>("Student added to the database", HttpStatus.CREATED);
+    }
+
+    @GetMapping("/Student/{id}")
+    public ResponseEntity<?> getStudentById(@PathVariable Long id) {
+        Student response = studentService.getStudentById(id);
+        if(response == null){
+            return new ResponseEntity<>("Student Not Found",HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
+    @PutMapping("/Student/{id}")
+    public ResponseEntity<?> putUpdateStudent(@PathVariable Long id, @RequestBody Student student) {    
+        
+        if(!studentService.checkIDExist(id))
+            return new ResponseEntity<>("Student Not Found", HttpStatus.NOT_FOUND);
+
+        Student response = studentService.updateStudent(id, student);
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
+    @DeleteMapping("/Student/{id}")
+    public ResponseEntity<?> deleteStudent(@PathVariable Long id){
+
+        if(!studentService.checkIDExist(id))
+            return new ResponseEntity<>("Student Not Found", HttpStatus.NOT_FOUND);
+
+        studentService.deleteStudent(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    } 
+}
+```
