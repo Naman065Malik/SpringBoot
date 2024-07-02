@@ -6,29 +6,29 @@ Build web, including RESTful, applications using Spring MVC. Uses Apache Tomcat 
 
 The Spring Web Starter dependency is part of the Spring Boot project and is designed to facilitate the development of web applications. When you include the Spring Web Starter dependency in your project, it provides a comprehensive set of libraries and frameworks that are essential for building web applications, including RESTful APIs.
 
-- **Core Components**
-    1. **Spring MVC**
-        1. The core web framework that provides model-view-controller (MVC) architecture and RESTful web services.
-        2. Enable building web applications and RESTful services.
-    2. **Embedded Servlet Container**
-        1. By default, includes Tomcat, but you can switch to Jetty or Undertow.
-        2. Allows you to run your application as a standalone application without requiring an external server.
-- **Key Features**
-    1. **RESTful API Development**
-        1. Annotations like `@RestController`, `@RequestMapping`, `@GetMapping`, `@PostMapping` , etc., to easily create REST endpoints.
-    2. **Spring MVC Annotations**
-        1. Annotations like `@Controller`, `@ResponseBody`, `@PathVariable`, `@RequestParam`, `@RequestBody`, etc., to handle web requests and responses.
-    3. **Static Content Support**
-        1. Automatically serves static content like HTML, CSS, and JavaScript from directories such as `/static`, `/public, `/resources`` m and `/META-INF/resources` .
+## **Core Components**
+1. **Spring MVC**
+   1. The core web framework that provides model-view-controller (MVC) architecture and RESTful web services.
+   2. Enable building web applications and RESTful services.
+2. **Embedded Servlet Container**
+   1. By default, includes Tomcat, but you can switch to Jetty or Undertow.
+   2. Allows you to run your application as a standalone application without requiring an external server.
+## **Key Features**
+1. **RESTful API Development**
+   1. Annotations like `@RestController`, `@RequestMapping`, `@GetMapping`, `@PostMapping` , etc., to easily create REST endpoints.
+2. **Spring MVC Annotations**
+   1. Annotations like `@Controller`, `@ResponseBody`, `@PathVariable`, `@RequestParam`, `@RequestBody`, etc., to handle web requests and responses.
+3. **Static Content Support**
+   1. Automatically serves static content like HTML, CSS, and JavaScript from directories such as `/static`, `/public, `/resources`` m and `/META-INF/resources` .
     
 
 # StudentTrack
 
 In this tutorial, we will be building StudentTrack to understand how RESTful applications are made using Spring Web. StudentTrack is a simple project designed to manage student records, demonstrating key concepts such as creating REST endpoints, handling HTTP requests and responses, and performing CRUD operations using Spring Boot and Spring Data JPA. Through this hands-on example, you'll gain a solid foundation in developing RESTful web services with the Spring Framework.
 
-## Base Code
+# Base Code
 
-### Spring Boot Entry Point
+## Spring Boot Entry Point
 
 As we know Spring Boot Initializer creates a base code template for the application in the `/src/main/java` folder that is given below:
 
